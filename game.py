@@ -59,6 +59,21 @@ class SpaceObject(object):
         self.y += dt * self.speed * sin(pi / 2 - radians(self.direction))
         self.sprite.y = self.y
         self.sprite.rotation += 0.01 * self.rspeed
+        
+class Meteor(SpaceObject):
+    def __init__(self, img_file,
+                 x=None, y=None,
+                 direction=None, 
+                 speed=None, rspeed=None):
+        super().__init__(img_file, x, y, direction)
+        self.speed = speed \
+            if speed is not None else randint
+    
+    def tick(self, dt):
+        self.bounce()
+        
+        #do promene dt se ulozi doba posledniho tiknuti
+        self.x += #....
 
 
 a = SpaceObject('SpaceShooterRedux/PNG/playerShip1_red.png')
