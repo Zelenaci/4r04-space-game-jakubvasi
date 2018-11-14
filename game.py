@@ -5,10 +5,13 @@
 # Licence: GNU/GPL
 ############################################################################
 import pyglet
+from pyglet.window import key
 import random
 from math import sin, cos, radians, pi
 
-window = pyglet.window.Window(1000, 800)
+window = pyglet.window.Window(800, 600)
+keys = key.KeyStateHandler()
+window.push_handlers(keys)
 batch = pyglet.graphics.Batch()   # pro optimalizované vyreslování objektů
 
 
@@ -16,8 +19,8 @@ class SpaceObject(object):
 
     def __init__(self, img_file,
                  x=None, y=None,
-                 direction=None,
-                 speed=None, rspeed=None):
+                 x_spd=None, y_spd=None
+                 speed=None, rotation=None):
 
         # nečtu obrázek
         self.image = pyglet.image.load(img_file)
@@ -33,6 +36,15 @@ class SpaceObject(object):
         # musím správně nastavit polohu sprite
         self.x = self._x
         self.y = self._y
+        
+        self.direction = direction if direction is not None else radians(random.randint(0, 360))
+        self.speed = speed         if speed is not None else random.randint(30, 180)
+        self.rotation = rotation   if rotation is not None else random.randint(-10, 10)
+        
+    def set_attr(self, direction, speed, rotation=0):
+        self.direction = direction
+        self.speed = speed
+        self.rotation = rotation
 
     @property
     def x(self):
@@ -51,38 +63,55 @@ class SpaceObject(object):
         self._y = self.sprite.y = new
 
     def tick(self, dt):
-        self.bounce()
+        #self.bounce()
 
         # do promenne dt se uloží doba od posledního tiknutí
-        self.x += dt * self.speed * cos(pi / 2 - radians(self.direction))
+        self.x += dt * self.speed * x_spd
         self.sprite.x = self.x
-        self.y += dt * self.speed * sin(pi / 2 - radians(self.direction))
+        self.y += dt * self.speed * y_spd
         self.sprite.y = self.y
-        self.sprite.rotation += 0.01 * self.rspeed
         
 class Meteor(SpaceObject):
     def __init__(self, img_file,
                  x=None, y=None,
                  direction=None, 
-                 speed=None, rspeed=None):
+                 speed=None, rotation=None):
         super().__init__(img_file, x, y, direction)
-        self.speed = speed \
-            if speed is not None else randint
-    
-    def tick(self, dt):
-        self.bounce()
+
+
+def test():
+    if keys[key.LEFT]:
+        a.set_attr(90, -500)
         
-        #do promene dt se ulozi doba posledniho tiknuti
-        self.x += #....
+    elif keys[key.RIGHT]:
+        a.set_attr(90, 500)
+        
+    elif keys[key.UP]:
+        a.set_attr(0, 500)
+        
+    elif keys[key.DOWN]:
+        a.set_attr(0, -500)
+        
+    #elif keys[key.UP and symbol == key.LEFT:
+        #a.set_attr(45, -500)
 
 
-a = SpaceObject('SpaceShooterRedux/PNG/playerShip1_red.png')
+a = SpaceObject('SpaceShooterRedux/PNG/playerShip1_red.png', window.width//2, 40, 0, 0 )
+pyglet.clock.schedule_interval(a.tick, 1/60)
 
 
 @window.event
 def on_draw():
     window.clear()
     batch.draw()
+
+@window.event
+def on_key_press(symbol, modifiers):
+    #a.set_attr(90, -400)
+
+@window.event
+def on_key_release(symbol, modifiers):
+    a.set_attr(0, 0)
 
 
 pyglet.app.run()
